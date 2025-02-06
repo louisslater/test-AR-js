@@ -10,6 +10,30 @@
     <script>
         THREEx.ArToolkitContext.baseURL = 'https://raw.githack.com/jeromeetienne/ar.js/master/three.js/'
     </script>
+    <script>
+	function updateUserLocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        const userLat = position.coords.latitude;
+                        const userLon = position.coords.longitude;
+
+                        // Display user's location
+                        document.getElementById("user-location").innerHTML = 
+                            `Your Location: ${userLat.toFixed(6)}, ${userLon.toFixed(6)}`;
+		    },
+                    (error) => {
+                        console.error("Error getting location:", error);
+                        document.getElementById("user-location").innerHTML = "Location unavailable";
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            } else {
+                document.getElementById("user-location").innerHTML = "Geolocation not supported.";
+            }
+        }
+    	document.addEventListener("DOMContentLoaded", updateUserLocation);
+    </script>
 </head>
 
 <body style='margin: 0; overflow: hidden;'>
