@@ -3,20 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Location Radius Detector</title>
+    <title>Proximity Detector with Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <style>
+        #map { height: 400px; width: 100%; }
+    </style>
 </head>
 <body>
-<h2>Location Radius Detector</h2>
+<h2>Location Proximity Detector</h2>
 <p id="status">Checking location...</p>
+<div id="map"></div>
 
 <script>
-        // Target location (Change this to your desired latitude & longitude)
+        // Target location (centre point)
         const targetLocation = {
-            lat: 53.0894455, // Example: London latitude
-            lon: -0.9446289  // Example: London longitude
+            lat: 53.0894455,
+            lon: -0.9446289
         };
 
-        const radius = 100; // Radius in meters
+        const radius = 100; // Detection radius in meters
+
+        // Initialize map
+        const map = L.map('map').setView([targetLocation.lat, targetLocation.lon], 16);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add target location marker
+        const targetMarker = L.marker([targetLocation.lat, targetLocation.lon]).addTo(map)
+            .bindPopup("Target Location").openPopup();
+
+        // Draw a circle around the target location
+        L.circle([targetLocation.lat, targetLocation.lon], {
+            radius: radius,
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.3
+        }).addTo(map);
+
+        let userMarker = null; // To track user location marker
 
         // Function to calculate distance using Haversine formula
         function getDistance(lat1, lon1, lat2, lon2) {
@@ -32,20 +60,28 @@
             return R * c;
         }
 
-        // Function to check if the user is within the radius
+        // Function to check proximity and update map
         function checkProximity(position) {
             const userLat = position.coords.latitude;
             const userLon = position.coords.longitude;
 
             const distance = getDistance(userLat, userLon, targetLocation.lat, targetLocation.lon);
-            document.getElementById('status').innerText = `You are ${distance.toFixed(2)} meters away from the target location.`;
+            document.getElementById('status').innerText = `Your Location: ${userLat.toFixed(5)}, ${userLon.toFixed(5)} | Distance to Target: ${distance.toFixed(2)} meters`;
+
+            // Update user location on map
+            if (userMarker) {
+                userMarker.setLatLng([userLat, userLon]);
+            } else {
+                userMarker = L.marker([userLat, userLon], { color: 'blue' }).addTo(map)
+                    .bindPopup("Your Location").openPopup();
+            }
 
             if (distance <= radius) {
                 alert("You are within the target radius!");
             }
         }
 
-        // Function to handle errors
+        // Handle errors
         function errorHandler(error) {
             console.error("Geolocation error:", error);
             document.getElementById('status').innerText = "Error retrieving location.";
