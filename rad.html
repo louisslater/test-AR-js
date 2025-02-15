@@ -4,14 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proximity Detector with Map</title>
+
+    <!-- Leaflet CSS & JS for Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
     <style>
-        #map { height: 400px; width: 100%; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        #status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-<h2>Location Proximity Detector v1.0</h2>
+<h2>Location Proximity Detector v1.1</h2>
 <p id="status">Checking location...</p>
 <div id="map"></div>
 
@@ -36,7 +51,7 @@
         const targetMarker = L.marker([targetLocation.lat, targetLocation.lon]).addTo(map)
             .bindPopup("Target Location").openPopup();
 
-        // Draw a circle around the target location
+        // Draw a detection radius circle around the target location
         L.circle([targetLocation.lat, targetLocation.lon], {
             radius: radius,
             color: 'red',
@@ -44,11 +59,11 @@
             fillOpacity: 0.3
         }).addTo(map);
 
-        let userMarker = null; // To track user location marker
+        let userMarker = null; // To track user's location marker
 
         // Function to calculate distance using Haversine formula
         function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371000; // Radius of the Earth in meters
+            const R = 6371000; // Earth radius in meters
             const toRad = (x) => x * Math.PI / 180;
 
             const dLat = toRad(lat2 - lat1);
@@ -72,7 +87,7 @@
             if (userMarker) {
                 userMarker.setLatLng([userLat, userLon]);
             } else {
-                userMarker = L.marker([userLat, userLon], { color: 'blue' }).addTo(map)
+                userMarker = L.marker([userLat, userLon]).addTo(map)
                     .bindPopup("Your Location").openPopup();
             }
 
@@ -83,8 +98,23 @@
 
         // Handle errors
         function errorHandler(error) {
-            console.error("Geolocation error:", error);
-            document.getElementById('status').innerText = "Error retrieving location.";
+            let errorMessage = "Error retrieving location.";
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = "Location access was denied by the user.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = "Location information is unavailable.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = "Request to get location timed out.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    errorMessage = "An unknown error occurred.";
+                    break;
+            }
+            console.error("Geolocation Error:", errorMessage);
+            document.getElementById('status').innerText = errorMessage;
         }
 
         // Request continuous location updates
