@@ -37,7 +37,7 @@
             lon: -0.94314
         };
 
-        const radius = 100; // Detection radius in meters
+        const radius = 20; // Detection radius in meters
 
         // Initialize map
         const map = L.map('map').setView([targetLocation.lat, targetLocation.lon], 16);
@@ -121,8 +121,8 @@
         if ("geolocation" in navigator) {
             navigator.geolocation.watchPosition(checkProximity, errorHandler, {
                 enableHighAccuracy: true,
-                maximumAge: 10000, //ms
-                timeout: 10000 //ms
+                maximumAge: 15000, //ms
+                timeout: 15000 //ms
             });
         } else {
             document.getElementById('status').innerText = "Geolocation is not supported by your browser.";
