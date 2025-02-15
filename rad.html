@@ -26,7 +26,7 @@
     </style>
 </head>
 <body>
-<h2>Location Proximity Detector v1.2</h2>
+<h2>Location Proximity Detector v1.3</h2>
 <p id="status">Checking location...</p>
 <div id="map"></div>
 
@@ -121,8 +121,8 @@
         if ("geolocation" in navigator) {
             navigator.geolocation.watchPosition(checkProximity, errorHandler, {
                 enableHighAccuracy: true,
-                maximumAge: 10000,
-                timeout: 5000
+                maximumAge: 10000, //ms
+                timeout: 10000 //ms
             });
         } else {
             document.getElementById('status').innerText = "Geolocation is not supported by your browser.";
