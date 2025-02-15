@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Radius Detector</title>
+</head>
+<body>
+<h2>Location Radius Detector</h2>
+<p id="status">Checking location...</p>
+
+<script>
+        // Target location (Change this to your desired latitude & longitude)
+        const targetLocation = {
+            lat: 53.0894455, // Example: London latitude
+            lon: -0.9446289  // Example: London longitude
+        };
+
+        const radius = 100; // Radius in meters
+
+        // Function to calculate distance using Haversine formula
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Radius of the Earth in meters
+            const toRad = (x) => x * Math.PI / 180;
+
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        // Function to check if the user is within the radius
+        function checkProximity(position) {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+
+            const distance = getDistance(userLat, userLon, targetLocation.lat, targetLocation.lon);
+            document.getElementById('status').innerText = `You are ${distance.toFixed(2)} meters away from the target location.`;
+
+            if (distance <= radius) {
+                alert("You are within the target radius!");
+            }
+        }
+
+        // Function to handle errors
+        function errorHandler(error) {
+            console.error("Geolocation error:", error);
+            document.getElementById('status').innerText = "Error retrieving location.";
+        }
+
+        // Request continuous location updates
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition(checkProximity, errorHandler, {
+                enableHighAccuracy: true,
+                maximumAge: 10000,
+                timeout: 5000
+            });
+        } else {
+            document.getElementById('status').innerText = "Geolocation is not supported by your browser.";
+        }
+    </script>
+</body>
+</html>
