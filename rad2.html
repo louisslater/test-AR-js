@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proximity Detector with Map</title>
+
+    <!-- Leaflet CSS & JS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        #status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<h2>Location Proximity Detector v1.4</h2>
+<p id="status">Checking location...</p>
+<div id="map"></div>
+
+<script>
+        // Target location (centre point)
+        const targetLocation = {
+            lat: 53.0778529,
+            lon: -0.9554543
+        };
+
+        const radius = 50; // Detection radius in meters
+
+        // Initialize map
+        const map = L.map('map').setView([targetLocation.lat, targetLocation.lon], 16);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add target location marker
+        const targetMarker = L.marker([targetLocation.lat, targetLocation.lon]).addTo(map)
+            .bindPopup("Target Location").openPopup();
+
+        // Draw a detection radius circle around the target location
+        L.circle([targetLocation.lat, targetLocation.lon], {
+            radius: radius,
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.3
+        }).addTo(map);
+
+        let userMarker = null; // To track user's location marker
+
+        // Function to calculate distance using Haversine formula
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Earth radius in meters
+            const toRad = (x) => x * Math.PI / 180;
+
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        // Function to check proximity and update map
+        function checkProximity(position) {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+
+            const distance = getDistance(userLat, userLon, targetLocation.lat, targetLocation.lon);
+            document.getElementById('status').innerText = `Your Location: ${userLat.toFixed(5)}, ${userLon.toFixed(5)} | Distance to Target: ${distance.toFixed(2)} meters`;
+
+            // Update user location on map
+            if (userMarker) {
+                userMarker.setLatLng([userLat, userLon]);
+            } else {
+                userMarker = L.marker([userLat, userLon]).addTo(map)
+                    .bindPopup("Your Location").openPopup();
+            }
+
+            if (distance <= radius) {
+                // alert("You are within the target radius!");
+            }
+        }
+
+        // Handle errors
+        function errorHandler(error) {
+            let errorMessage = "Error retrieving location.";
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = "Location access was denied by the user.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = "Location information is unavailable.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = "Request to get location timed out.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    errorMessage = "An unknown error occurred.";
+                    break;
+            }
+            console.error("Geolocation Error:", errorMessage);
+            document.getElementById('status').innerText = errorMessage;
+        }
+
+        // Request continuous location updates
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition(checkProximity, errorHandler, {
+                enableHighAccuracy: true,
+                maximumAge: 15000, //ms
+                timeout: 15000 //ms
+            });
+        } else {
+            document.getElementById('status').innerText = "Geolocation is not supported by your browser.";
+        }
+    </script>
+</body>
+</html>
