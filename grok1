@@ -33,9 +33,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script>
         // Target coordinates (example: Times Square, NYC)
-        const TARGET_LAT = 40.7580;
-        const TARGET_LON = -73.9855;
-        const RANGE = 100; // meters
+        const TARGET_LAT = 53.0845626;
+        const TARGET_LON = -0.9566571;
+        const RANGE = 50; // meters
 
         // Scene setup
         let scene, camera, renderer, model;
