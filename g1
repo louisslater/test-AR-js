@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AR Dead Man Detector</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+        }
+        #status { 
+            position: absolute; 
+            top: 10px; 
+            left: 10px; 
+            color: white; 
+            z-index: 100; 
+        }
+        #arButton { 
+            position: absolute; 
+            bottom: 20px; 
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">Checking location...</div>
+    <button id="arButton">Enter AR</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script>
+        // Target coordinates (example: Times Square, NYC)
+        const TARGET_LAT = 40.7580;
+        const TARGET_LON = -73.9855;
+        const RANGE = 100; // meters
+
+        // Scene setup
+        let scene, camera, renderer, model;
+        let inRange = false;
+
+        // Check if device supports WebXR
+        const isARSupported = navigator.xr && 'isSessionSupported' in navigator.xr;
+
+        function init() {
+            // Create scene
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            document.body.appendChild(renderer.domElement);
+
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(0, 1, 0);
+            scene.add(directionalLight);
+
+            // Create simple 3D model of a person lying down (using basic geometry)
+            const bodyGeometry = new THREE.BoxGeometry(1.8, 0.2, 0.5);
+            const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0x666666 });
+            model = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            model.position.set(0, -1, -2); // Position in front of camera
+            model.rotation.x = Math.PI / 2; // Lie flat
+            scene.add(model);
+
+            // Start GPS tracking
+            startGPSTracking();
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                     Math.cos(φ1) * Math.cos(φ2) *
+                     Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; // Distance in meters
+        }
+
+        function startGPSTracking() {
+            if (!navigator.geolocation) {
+                document.getElementById('status').innerText = 'Geolocation not supported';
+                return;
+            }
+
+            navigator.geolocation.watchPosition(
+                (position) => {
+                    const distance = calculateDistance(
+                        position.coords.latitude,
+                        position.coords.longitude,
+                        TARGET_LAT,
+                        TARGET_LON
+                    );
+
+                    if (distance <= RANGE) {
+                        if (!inRange) {
+                            inRange = true;
+                            document.getElementById('status').innerText = 
+                                'In range! Ready for AR';
+                            if (isARSupported) {
+                                document.getElementById('arButton').style.display = 'block';
+                            }
+                        }
+                    } else {
+                        inRange = false;
+                        document.getElementById('status').innerText = 
+                            `Out of range: ${Math.round(distance)}m away`;
+                        document.getElementById('arButton').style.display = 'none';
+                    }
+                },
+                (error) => {
+                    document.getElementById('status').innerText = 
+                        `GPS Error: ${error.message}`;
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 5000
+                }
+            );
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(() => {
+                renderer.render(scene, camera);
+            });
+        }
+
+        // AR Button handler
+        document.getElementById('arButton').addEventListener('click', async () => {
+            if (!isARSupported) return;
+
+            try {
+                const session = await navigator.xr.requestSession('immersive-ar', {
+                    optionalFeatures: ['hit-test', 'dom-overlay'],
+                    domOverlay: { root: document.body }
+                });
+                
+                renderer.xr.setSession(session);
+                document.getElementById('arButton').style.display = 'none';
+                document.getElementById('status').innerText = 'AR Mode Active';
+            } catch (error) {
+                console.error('AR Error:', error);
+            }
+        });
+
+        // Start the app
+        init();
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
