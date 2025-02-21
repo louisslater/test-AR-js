@@ -27,7 +27,7 @@
     <div id="coords">Loading coordinates...</div>
     <!-- AR container -->
     <div id="ar-container">
-        <a-scene vr-mode-ui="enabled: false" arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;">
+        <a-scene vr-mode-ui="enabled: false" arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; trackingMethod: best; detectionMode: mono_and_rgb;">
             <!-- AR camera with GPS -->
             <a-camera gps-camera rotation-reader></a-camera>
             <!-- 3D coffin model at target location -->
