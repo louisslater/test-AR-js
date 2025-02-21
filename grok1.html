@@ -16,10 +16,11 @@
         #map { height: 70vh; width: 100%; }
         #coords { text-align: center; padding: 10px; font-size: 16px; }
         #ar-container { display: none; height: 100vh; width: 100%; }
+        #version { position: absolute; top: 5px; left: 5px; font-size: 12px; color: gray; }
     </style>
 </head>
 <body>
-    <div>v01</div>
+    <div id="version">v01</div>
     <!-- Map container -->
     <div id="map"></div>
     <!-- Latitude/Longitude display -->
@@ -29,30 +30,31 @@
         <a-scene vr-mode-ui="enabled: false" arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;">
             <!-- AR camera with GPS -->
             <a-camera gps-camera rotation-reader></a-camera>
-            <!-- Square box on the floor -->
-            <a-box position="0 -1 0" width="2" height="0.1" depth="2" color="red" gps-entity-place="latitude: 0; longitude: 0"></a-box>
+            <!-- Square box on the floor at target location -->
+            <a-box position="0 -1 0" width="2" height="0.1" depth="2" color="red" gps-entity-place="latitude: 53.0845626; longitude: -0.9566571"></a-box>
         </a-scene>
     </div>
 
     <script>
-        // Target location (example: replace with your desired lat/long)
-        const targetLat = 53.0845626; // e.g., San Francisco
+        // Target location and radius
+        const targetLat = 53.0845626;
         const targetLong = -0.9566571;
-        const radius = 50; // Radius in meters to trigger AR
+        const radius = 50; // Radius in meters
 
         // DOM elements
         const mapDiv = document.getElementById('map');
         const coordsDiv = document.getElementById('coords');
         const arContainer = document.getElementById('ar-container');
 
-        // Initialize Leaflet map
-        const map = L.map('map').setView([0, 0], 13);
+        // Initialize Leaflet map, centered on target
+        const map = L.map('map').setView([targetLat, targetLong], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+            attribution: '© OpenStreetMap contributors'
         }).addTo(map);
-        let marker = L.marker([0, 0]).addTo(map);
+        let userMarker = L.marker([0, 0]).addTo(map); // Your position
+        L.marker([targetLat, targetLong]).addTo(map); // Target position
 
-        // Function to calculate distance between two lat/long points (Haversine formula)
+        // Haversine formula for distance
         function getDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3; // Earth's radius in meters
             const φ1 = lat1 * Math.PI / 180;
@@ -72,8 +74,8 @@
             const long = position.coords.longitude;
 
             // Update map and marker
-            map.setView([lat, long], 13);
-            marker.setLatLng([lat, long]);
+            userMarker.setLatLng([lat, long]);
+            map.setView([lat, long], 15);
 
             // Update coordinates display
             coordsDiv.textContent = `Lat: ${lat.toFixed(6)}, Long: ${long.toFixed(6)}`;
@@ -81,16 +83,12 @@
             // Check distance to target
             const distance = getDistance(lat, long, targetLat, targetLong);
             if (distance <= radius) {
-                // Switch to AR mode
+                // Inside radius: Show AR
                 mapDiv.style.display = 'none';
                 coordsDiv.style.display = 'none';
                 arContainer.style.display = 'block';
-
-                // Update box position to target location
-                const box = document.querySelector('a-box');
-                box.setAttribute('gps-entity-place', `latitude: ${targetLat}; longitude: ${targetLong}`);
             } else {
-                // Stay in map mode
+                // Outside radius: Show map
                 mapDiv.style.display = 'block';
                 coordsDiv.style.display = 'block';
                 arContainer.style.display = 'none';
