@@ -20,7 +20,7 @@
     </style>
 </head>
 <body>
-    <div id="version">v02</div>
+    <div id="version">v03</div>
     <!-- Map container -->
     <div id="map"></div>
     <!-- Latitude/Longitude display -->
@@ -67,11 +67,11 @@
     </div>
 
     <script>
-        // Three nearby target locations (approximate offsets from original)
+        // Three nearby target locations with matching colors
         const targets = [
-            { lat: 53.0844322, long: -0.9565116, cubeId: 'cube1' }, // Red cube
-            { lat: 53.0843911, long: -0.9565646, cubeId: 'cube2' }, // Blue cube
-            { lat: 53.0844544, long: -0.9566229, cubeId: 'cube3' }  // Green cube
+            { lat: 53.0844322, long: -0.9565116, cubeId: 'cube1', color: 'red' },    // Red cube
+            { lat: 53.0843911, long: -0.9565646, cubeId: 'cube2', color: 'blue' },   // Blue cube
+            { lat: 53.0844544, long: -0.9566229, cubeId: 'cube3', color: 'green' }   // Green cube
         ];
         const radius = 2; // Radius in meters
     
@@ -92,13 +92,13 @@
         }).addTo(map);
         let userMarker = L.marker([0, 0]).addTo(map); // Your position
     
-        // Add red circles for each target location
+        // Add colored circles for each target location
         targets.forEach(target => {
             L.circle([target.lat, target.long], {
-                color: 'red',
-                fillColor: '#f03',
-                fillOpacity: 0.5,
-                radius: radius // Visual circle size
+                color: target.color,          // Outline color matches cube
+                fillColor: target.color,      // Fill color matches cube
+                fillOpacity: 0.5,             // Keep some transparency
+                radius: radius                // Visual circle size
             }).addTo(map);
         });
     
@@ -131,7 +131,6 @@
                 map.setView([lat, long], 15);
                 isFirstUpdate = false;
             }
-            // Removed map.panTo to prevent resetting view
     
             // Update coordinates display
             coordsDiv.textContent = `Lat: ${lat.toFixed(6)}, Long: ${long.toFixed(6)}`;
