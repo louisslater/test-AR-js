@@ -69,11 +69,11 @@
     <script>
         // Three nearby target locations (approximate offsets from original)
         const targets = [
-            { lat: 53.0845626, long: -0.9566571, cubeId: 'cube1' }, // Red cube
-            { lat: 53.0846626, long: -0.9567571, cubeId: 'cube2' }, // Blue cube
-            { lat: 53.0844626, long: -0.9565571, cubeId: 'cube3' }  // Green cube
+            { lat: 53.0844322, long: -0.9565116, cubeId: 'cube1' }, // Red cube
+            { lat: 53.0843911, long: -0.9565646, cubeId: 'cube2' }, // Blue cube
+            { lat: 53.0844544, long: -0.9566229, cubeId: 'cube3' }  // Green cube
         ];
-        const radius = 3; // Radius in meters
+        const radius = 2; // Radius in meters
     
         // DOM elements
         const mapDiv = document.getElementById('map');
@@ -98,7 +98,7 @@
                 color: 'red',
                 fillColor: '#f03',
                 fillOpacity: 0.5,
-                radius: 10 // Visual circle size
+                radius: radius // Visual circle size
             }).addTo(map);
         });
     
