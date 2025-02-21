@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Map to AR Cubes</title>
+    <!-- Leaflet.js for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- A-Frame for AR scene -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <!-- AR.js for location-based AR -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #map { height: 70vh; width: 100%; }
+        #coords { text-align: center; padding: 10px; font-size: 16px; }
+        #ar-container { display: none; height: 100vh; width: 100%; }
+        #version { position: absolute; top: 5px; left: 5px; font-size: 12px; color: gray; }
+    </style>
+</head>
+<body>
+    <div id="version">v02</div>
+    <!-- Map container -->
+    <div id="map"></div>
+    <!-- Latitude/Longitude display -->
+    <div id="coords">Loading coordinates...</div>
+    <!-- AR container -->
+    <div id="ar-container">
+        <a-scene vr-mode-ui="enabled: false" arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;">
+            <!-- AR camera with GPS -->
+            <a-camera gps-camera rotation-reader></a-camera>
+            <!-- Cube 1: Red -->
+            <a-box 
+                id="cube1"
+                position="0 -0.25 -6"
+                width="0.5" 
+                height="0.5" 
+                depth="0.5" 
+                color="red" 
+                visible="false"
+                static-body>
+            </a-box>
+            <!-- Cube 2: Blue -->
+            <a-box 
+                id="cube2"
+                position="0 -0.25 -6"
+                width="0.5" 
+                height="0.5" 
+                depth="0.5" 
+                color="blue" 
+                visible="false"
+                static-body>
+            </a-box>
+            <!-- Cube 3: Green -->
+            <a-box 
+                id="cube3"
+                position="0 -0.25 -6"
+                width="0.5" 
+                height="0.5" 
+                depth="0.5" 
+                color="green" 
+                visible="false"
+                static-body>
+            </a-box>
+        </a-scene>
+    </div>
+
+    <script>
+        // Three nearby target locations (approximate offsets from original)
+        const targets = [
+            { lat: 53.0845626, long: -0.9566571, cubeId: 'cube1' }, // Red cube
+            { lat: 53.0846626, long: -0.9567571, cubeId: 'cube2' }, // Blue cube (approx 10m north, 10m west)
+            { lat: 53.0844626, long: -0.9565571, cubeId: 'cube3' }  // Green cube (approx 10m south, 10m east)
+        ];
+        const radius = 20; // Radius in meters
+
+        // DOM elements
+        const mapDiv = document.getElementById('map');
+        const coordsDiv = document.getElementById('coords');
+        const arContainer = document.getElementById('ar-container');
+        const cubes = {
+            cube1: document.getElementById('cube1'),
+            cube2: document.getElementById('cube2'),
+            cube3: document.getElementById('cube3')
+        };
+
+        // Initialize Leaflet map, centered on first target
+        const map = L.map('map').setView([targets[0].lat, targets[0].long], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        let userMarker = L.marker([0, 0]).addTo(map); // Your position
+
+        // Add red circles for each target location
+        targets.forEach(target => {
+            L.circle([target.lat, target.long], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.5,
+                radius: 10 // Visual circle size
+            }).addTo(map);
+        });
+
+        // Haversine formula for distance
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Distance in meters
+        }
+
+        // Update position
+        function updatePosition(position) {
+            const lat = position.coords.latitude;
+            const long = position.coords.longitude;
+
+            // Update map and marker
+            userMarker.setLatLng([lat, long]);
+            map.setView([lat, long], 15);
+
+            // Update coordinates display
+            coordsDiv.textContent = `Lat: ${lat.toFixed(6)}, Long: ${long.toFixed(6)}`;
+
+            // Check distance to each target
+            let showAR = false;
+            targets.forEach(target => {
+                const distance = getDistance(lat, long, target.lat, target.long);
+                const cube = cubes[target.cubeId];
+                if (distance <= radius) {
+                    cube.setAttribute('visible', 'true');
+                    showAR = true;
+                } else {
+                    cube.setAttribute('visible', 'false');
+                }
+            });
+
+            // Toggle AR or map visibility
+            if (showAR) {
+                mapDiv.style.display = 'none';
+                coordsDiv.style.display = 'none';
+                arContainer.style.display = 'block';
+            } else {
+                mapDiv.style.display = 'block';
+                coordsDiv.style.display = 'block';
+                arContainer.style.display = 'none';
+            }
+        }
+
+        // Handle GPS errors
+        function handleError(error) {
+            coordsDiv.textContent = `Error: ${error.message}`;
+        }
+
+        // Watch position updates
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(updatePosition, handleError, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000
+            });
+        } else {
+            coordsDiv.textContent = "Geolocation not supported.";
+        }
+    </script>
+</body>
+</html>
