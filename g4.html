@@ -70,11 +70,11 @@
         // Three nearby target locations (approximate offsets from original)
         const targets = [
             { lat: 53.0845626, long: -0.9566571, cubeId: 'cube1' }, // Red cube
-            { lat: 53.0846626, long: -0.9567571, cubeId: 'cube2' }, // Blue cube (approx 10m north, 10m west)
-            { lat: 53.0844626, long: -0.9565571, cubeId: 'cube3' }  // Green cube (approx 10m south, 10m east)
+            { lat: 53.0846626, long: -0.9567571, cubeId: 'cube2' }, // Blue cube
+            { lat: 53.0844626, long: -0.9565571, cubeId: 'cube3' }  // Green cube
         ];
-        const radius = 10; // Radius in meters
-
+        const radius = 20; // Radius in meters
+    
         // DOM elements
         const mapDiv = document.getElementById('map');
         const coordsDiv = document.getElementById('coords');
@@ -84,14 +84,14 @@
             cube2: document.getElementById('cube2'),
             cube3: document.getElementById('cube3')
         };
-
+    
         // Initialize Leaflet map, centered on first target
         const map = L.map('map').setView([targets[0].lat, targets[0].long], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
         let userMarker = L.marker([0, 0]).addTo(map); // Your position
-
+    
         // Add red circles for each target location
         targets.forEach(target => {
             L.circle([target.lat, target.long], {
@@ -101,7 +101,7 @@
                 radius: 10 // Visual circle size
             }).addTo(map);
         });
-
+    
         // Haversine formula for distance
         function getDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3; // Earth's radius in meters
@@ -115,19 +115,29 @@
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             return R * c; // Distance in meters
         }
-
+    
+        // Track whether this is the first position update
+        let isFirstUpdate = true;
+    
         // Update position
         function updatePosition(position) {
             const lat = position.coords.latitude;
             const long = position.coords.longitude;
-
+    
             // Update map and marker
             userMarker.setLatLng([lat, long]);
-            map.setView([lat, long], 15);
-
+            if (isFirstUpdate) {
+                // Set initial view with zoom level 15
+                map.setView([lat, long], 15);
+                isFirstUpdate = false;
+            } else {
+                // Only pan to new position, preserving current zoom
+                map.panTo([lat, long]);
+            }
+    
             // Update coordinates display
             coordsDiv.textContent = `Lat: ${lat.toFixed(6)}, Long: ${long.toFixed(6)}`;
-
+    
             // Check distance to each target
             let showAR = false;
             targets.forEach(target => {
@@ -140,7 +150,7 @@
                     cube.setAttribute('visible', 'false');
                 }
             });
-
+    
             // Toggle AR or map visibility
             if (showAR) {
                 mapDiv.style.display = 'none';
@@ -152,12 +162,12 @@
                 arContainer.style.display = 'none';
             }
         }
-
+    
         // Handle GPS errors
         function handleError(error) {
             coordsDiv.textContent = `Error: ${error.message}`;
         }
-
+    
         // Watch position updates
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(updatePosition, handleError, {
