@@ -19,6 +19,7 @@
     </style>
 </head>
 <body>
+    <div>v01</div>
     <!-- Map container -->
     <div id="map"></div>
     <!-- Latitude/Longitude display -->
@@ -28,16 +29,16 @@
         <a-scene vr-mode-ui="enabled: false" arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;">
             <!-- AR camera with GPS -->
             <a-camera gps-camera rotation-reader></a-camera>
-            <!-- Square box on the floor at target location -->
-            <a-box position="0 -1 0" width="2" height="0.1" depth="2" color="blue" gps-entity-place="latitude: 53.0845626; longitude: -0.9566571"></a-box>
+            <!-- Square box on the floor -->
+            <a-box position="0 -1 0" width="2" height="0.1" depth="2" color="red" gps-entity-place="latitude: 0; longitude: 0"></a-box>
         </a-scene>
     </div>
 
     <script>
-        // Target location and radius
-        const targetLat = 53.0845626; 
+        // Target location (example: replace with your desired lat/long)
+        const targetLat = 53.0845626; // e.g., San Francisco
         const targetLong = -0.9566571;
-        const radius = 50; // 50 meters
+        const radius = 50; // Radius in meters to trigger AR
 
         // DOM elements
         const mapDiv = document.getElementById('map');
@@ -45,12 +46,72 @@
         const arContainer = document.getElementById('ar-container');
 
         // Initialize Leaflet map
-        const map = L.map('map').setView([targetLat, targetLong], 15); // Start centered on target
+        const map = L.map('map').setView([0, 0], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
-        let marker = L.marker([0, 0]).addTo(map); // Your position marker
-        L.marker([targetLat, targetLong]).addTo(map); // Target location marker
+        let marker = L.marker([0, 0]).addTo(map);
 
-        // Function to calculate distance (Haversine formula)
-        function getDistance(lat1, lon1, lat2,
+        // Function to calculate distance between two lat/long points (Haversine formula)
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Distance in meters
+        }
+
+        // Update position
+        function updatePosition(position) {
+            const lat = position.coords.latitude;
+            const long = position.coords.longitude;
+
+            // Update map and marker
+            map.setView([lat, long], 13);
+            marker.setLatLng([lat, long]);
+
+            // Update coordinates display
+            coordsDiv.textContent = `Lat: ${lat.toFixed(6)}, Long: ${long.toFixed(6)}`;
+
+            // Check distance to target
+            const distance = getDistance(lat, long, targetLat, targetLong);
+            if (distance <= radius) {
+                // Switch to AR mode
+                mapDiv.style.display = 'none';
+                coordsDiv.style.display = 'none';
+                arContainer.style.display = 'block';
+
+                // Update box position to target location
+                const box = document.querySelector('a-box');
+                box.setAttribute('gps-entity-place', `latitude: ${targetLat}; longitude: ${targetLong}`);
+            } else {
+                // Stay in map mode
+                mapDiv.style.display = 'block';
+                coordsDiv.style.display = 'block';
+                arContainer.style.display = 'none';
+            }
+        }
+
+        // Handle GPS errors
+        function handleError(error) {
+            coordsDiv.textContent = `Error: ${error.message}`;
+        }
+
+        // Watch position updates
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(updatePosition, handleError, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000
+            });
+        } else {
+            coordsDiv.textContent = "Geolocation not supported.";
+        }
+    </script>
+</body>
+</html>
