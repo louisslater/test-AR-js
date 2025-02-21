@@ -48,7 +48,7 @@
         // Target location and radius
         const targetLat = 53.0845626;
         const targetLong = -0.9566571;
-        const radius = 5; // Radius in meters (changed to 5m)
+        const radius = 5; // Radius in meters
 
         // DOM elements
         const mapDiv = document.getElementById('map');
@@ -61,7 +61,14 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
         let userMarker = L.marker([0, 0]).addTo(map); // Your position
-        L.marker([targetLat, targetLong]).addTo(map); // Target position
+
+        // Red circle for target location
+        L.circle([targetLat, targetLong], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.5,
+            radius: 10 // Radius of the circle in meters (visual size, not trigger radius)
+        }).addTo(map);
 
         // Haversine formula for distance
         function getDistance(lat1, lon1, lat2, lon2) {
