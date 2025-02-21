@@ -1,168 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AR Dead Man Detector</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Map to AR Box</title>
+    <!-- Leaflet.js for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- A-Frame for AR scene -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <!-- AR.js for location-based AR -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-        }
-        #status { 
-            position: absolute; 
-            top: 10px; 
-            left: 10px; 
-            color: white; 
-            z-index: 100; 
-        }
-        #arButton { 
-            position: absolute; 
-            bottom: 20px; 
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            display: none;
-        }
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #map { height: 70vh; width: 100%; }
+        #coords { text-align: center; padding: 10px; font-size: 16px; }
+        #ar-container { display: none; height: 100vh; width: 100%; }
     </style>
 </head>
 <body>
-    <div id="status">Checking location...</div>
-    <button id="arButton">Enter AR</button>
+    <!-- Map container -->
+    <div id="map"></div>
+    <!-- Latitude/Longitude display -->
+    <div id="coords">Loading coordinates...</div>
+    <!-- AR container -->
+    <div id="ar-container">
+        <a-scene vr-mode-ui="enabled: false" arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;">
+            <!-- AR camera with GPS -->
+            <a-camera gps-camera rotation-reader></a-camera>
+            <!-- Square box on the floor -->
+            <a-box position="0 -1 0" width="2" height="0.1" depth="2" color="red" gps-entity-place="latitude: 0; longitude: 0"></a-box>
+        </a-scene>
+    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script>
-        // Target coordinates (example: Times Square, NYC)
-        const TARGET_LAT = 53.0845626;
-        const TARGET_LON = -0.9566571;
-        const RANGE = 50; // meters
+        // Target location (example: replace with your desired lat/long)
+        const targetLat = 37.7749; // e.g., San Francisco
+        const targetLong = -122.4194;
+        const radius = 50; // Radius in meters to trigger AR
 
-        // Scene setup
-        let scene, camera, renderer, model;
-        let inRange = false;
+        // DOM elements
+        const mapDiv = document.getElementById('map');
+        const coordsDiv = document.getElementById('coords');
+        const arContainer = document.getElementById('ar-container');
 
-        // Check if device supports WebXR
-        const isARSupported = navigator.xr && 'isSessionSupported' in navigator.xr;
+        // Initialize Leaflet map
+        const map = L.map('map').setView([0, 0], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        let marker = L.marker([0, 0]).addTo(map);
 
-        function init() {
-            // Create scene
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.xr.enabled = true;
-            document.body.appendChild(renderer.domElement);
-
-            // Add lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            directionalLight.position.set(0, 1, 0);
-            scene.add(directionalLight);
-
-            // Create simple 3D model of a person lying down (using basic geometry)
-            const bodyGeometry = new THREE.BoxGeometry(1.8, 0.2, 0.5);
-            const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0x666666 });
-            model = new THREE.Mesh(bodyGeometry, bodyMaterial);
-            model.position.set(0, -1, -2); // Position in front of camera
-            model.rotation.x = Math.PI / 2; // Lie flat
-            scene.add(model);
-
-            // Start GPS tracking
-            startGPSTracking();
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
+        // Function to calculate distance between two lat/long points (Haversine formula)
+        function getDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3; // Earth's radius in meters
-            const φ1 = lat1 * Math.PI/180;
-            const φ2 = lat2 * Math.PI/180;
-            const Δφ = (lat2-lat1) * Math.PI/180;
-            const Δλ = (lon2-lon1) * Math.PI/180;
-
-            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                     Math.cos(φ1) * Math.cos(φ2) *
-                     Math.sin(Δλ/2) * Math.sin(Δλ/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             return R * c; // Distance in meters
         }
 
-        function startGPSTracking() {
-            if (!navigator.geolocation) {
-                document.getElementById('status').innerText = 'Geolocation not supported';
-                return;
+        // Update position
+        function updatePosition(position) {
+            const lat = position.coords.latitude;
+            const long = position.coords.longitude;
+
+            // Update map and marker
+            map.setView([lat, long], 13);
+            marker.setLatLng([lat, long]);
+
+            // Update coordinates display
+            coordsDiv.textContent = `Lat: ${lat.toFixed(6)}, Long: ${long.toFixed(6)}`;
+
+            // Check distance to target
+            const distance = getDistance(lat, long, targetLat, targetLong);
+            if (distance <= radius) {
+                // Switch to AR mode
+                mapDiv.style.display = 'none';
+                coordsDiv.style.display = 'none';
+                arContainer.style.display = 'block';
+
+                // Update box position to target location
+                const box = document.querySelector('a-box');
+                box.setAttribute('gps-entity-place', `latitude: ${targetLat}; longitude: ${targetLong}`);
+            } else {
+                // Stay in map mode
+                mapDiv.style.display = 'block';
+                coordsDiv.style.display = 'block';
+                arContainer.style.display = 'none';
             }
-
-            navigator.geolocation.watchPosition(
-                (position) => {
-                    const distance = calculateDistance(
-                        position.coords.latitude,
-                        position.coords.longitude,
-                        TARGET_LAT,
-                        TARGET_LON
-                    );
-
-                    if (distance <= RANGE) {
-                        if (!inRange) {
-                            inRange = true;
-                            document.getElementById('status').innerText = 
-                                'In range! Ready for AR';
-                            if (isARSupported) {
-                                document.getElementById('arButton').style.display = 'block';
-                            }
-                        }
-                    } else {
-                        inRange = false;
-                        document.getElementById('status').innerText = 
-                            `Out of range: ${Math.round(distance)}m away`;
-                        document.getElementById('arButton').style.display = 'none';
-                    }
-                },
-                (error) => {
-                    document.getElementById('status').innerText = 
-                        `GPS Error: ${error.message}`;
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 0,
-                    timeout: 5000
-                }
-            );
         }
 
-        function animate() {
-            renderer.setAnimationLoop(() => {
-                renderer.render(scene, camera);
+        // Handle GPS errors
+        function handleError(error) {
+            coordsDiv.textContent = `Error: ${error.message}`;
+        }
+
+        // Watch position updates
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(updatePosition, handleError, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000
             });
+        } else {
+            coordsDiv.textContent = "Geolocation not supported.";
         }
-
-        // AR Button handler
-        document.getElementById('arButton').addEventListener('click', async () => {
-            if (!isARSupported) return;
-
-            try {
-                const session = await navigator.xr.requestSession('immersive-ar', {
-                    optionalFeatures: ['hit-test', 'dom-overlay'],
-                    domOverlay: { root: document.body }
-                });
-                
-                renderer.xr.setSession(session);
-                document.getElementById('arButton').style.display = 'none';
-                document.getElementById('status').innerText = 'AR Mode Active';
-            } catch (error) {
-                console.error('AR Error:', error);
-            }
-        });
-
-        // Start the app
-        init();
-        animate();
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
