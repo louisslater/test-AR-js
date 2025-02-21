@@ -1,0 +1,11 @@
+Model Information:
+* title:	Candlestick
+* source:	https://sketchfab.com/3d-models/candlestick-89d21efb2fcb424499058436bbcdfdfa
+* author:	dilatypo (https://sketchfab.com/dilatypo)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Candlestick" (https://sketchfab.com/3d-models/candlestick-89d21efb2fcb424499058436bbcdfdfa) by dilatypo (https://sketchfab.com/dilatypo) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
