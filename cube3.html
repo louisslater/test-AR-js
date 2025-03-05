@@ -31,38 +31,32 @@
             <!-- AR camera with GPS -->
             <a-camera gps-camera rotation-reader></a-camera>
             <!-- Cube 1: Red -->
-            <a-box 
-                id="cube1"
-                position="0 -0.25 -6"
-                width="0.5" 
-                height="0.5" 
-                depth="0.5" 
-                color="red" 
-                visible="false"
-                static-body>
-            </a-box>
+            <a-entity
+                    id="cube1"
+                    gltf-model="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf"
+                    position="0 -1 -6"
+                    scale="2 2 2"
+                    visible="false"
+                    static-body>
+            </a-entity>
             <!-- Cube 2: Blue -->
-            <a-box 
-                id="cube2"
-                position="0 -0.25 -6"
-                width="0.5" 
-                height="0.5" 
-                depth="0.5" 
-                color="blue" 
-                visible="false"
-                static-body>
-            </a-box>
+            <a-entity
+                    id="cube2"
+                    gltf-model="./assets2/candlestick/scene.gltf"
+                    position="0 -1 -6"
+                    scale="2 2 2"
+                    visible="false"
+                    static-body>
+            </a-entity>
             <!-- Cube 3: Green -->
-            <a-box 
-                id="cube3"
-                position="0 -0.25 -6"
-                width="0.5" 
-                height="0.5" 
-                depth="0.5" 
-                color="green" 
-                visible="false"
-                static-body>
-            </a-box>
+            <a-entity
+                    id="cube3"
+                    gltf-model="./assets2/knife/scene.gltf"
+                    position="0 -1 -6"
+                    scale="2 2 2"
+                    visible="false"
+                    static-body>
+            </a-entity>
         </a-scene>
     </div>
 
