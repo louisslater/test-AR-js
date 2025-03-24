@@ -14,7 +14,7 @@
           <mxGeometry x="152.5" y="170" width="50" height="30" as="geometry" />
         </mxCell>
         <mxCell id="w9KXQvv5ElY8Gr5ibtP6-29" value="Weapon&amp;nbsp;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="310" y="160" width="70" height="30" as="geometry" />
+          <mxGeometry x="325.63" y="160" width="70" height="30" as="geometry" />
         </mxCell>
         <mxCell id="w9KXQvv5ElY8Gr5ibtP6-31" value="" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
           <mxGeometry x="140" y="400" width="120" height="120" as="geometry" />
@@ -157,9 +157,6 @@
         </mxCell>
         <mxCell id="w9KXQvv5ElY8Gr5ibtP6-50" value="" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
           <mxGeometry x="320" y="320" width="80" height="80" as="geometry" />
-        </mxCell>
-        <mxCell id="w9KXQvv5ElY8Gr5ibtP6-52" value="Inventory" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="500" y="130" width="70" height="30" as="geometry" />
         </mxCell>
         <mxCell id="w9KXQvv5ElY8Gr5ibtP6-53" value="Inventory" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="320" y="320" width="80" height="8.75" as="geometry" />
