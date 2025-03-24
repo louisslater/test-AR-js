@@ -157,7 +157,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="w9KXQvv5ElY8Gr5ibtP6-47" value="Win" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
-          <mxGeometry x="161.25" y="560" width="80" height="80" as="geometry" />
+          <mxGeometry x="240" y="560" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="w9KXQvv5ElY8Gr5ibtP6-48" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="w9KXQvv5ElY8Gr5ibtP6-43" target="w9KXQvv5ElY8Gr5ibtP6-47" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -176,12 +176,6 @@
         </mxCell>
         <mxCell id="w9KXQvv5ElY8Gr5ibtP6-58" value="Map" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="320" y="388.75" width="30" height="11.25" as="geometry" />
-        </mxCell>
-        <mxCell id="w9KXQvv5ElY8Gr5ibtP6-67" value="Wrong" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="112.5" y="335" width="40" height="20" as="geometry" />
-        </mxCell>
-        <mxCell id="w9KXQvv5ElY8Gr5ibtP6-68" value="Correct" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="133.75" y="530" width="40" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Wcfau3vfe7TbY7cXF94y-7" value="Crime Scene" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry x="112.5" y="280" width="90" height="30" as="geometry" />
@@ -236,6 +230,21 @@
         </mxCell>
         <mxCell id="Wcfau3vfe7TbY7cXF94y-36" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.4_point_star_2;dx=0.76;" vertex="1" parent="1">
           <mxGeometry x="370" y="339" width="17" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="Wcfau3vfe7TbY7cXF94y-37" value="Wrong" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="112.5" y="560" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Wcfau3vfe7TbY7cXF94y-38" value="Correct" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="250" y="518" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Wcfau3vfe7TbY7cXF94y-39" value="Wrong" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="80" y="520" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Wcfau3vfe7TbY7cXF94y-40" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="w9KXQvv5ElY8Gr5ibtP6-43" target="Wcfau3vfe7TbY7cXF94y-37">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="211" y="530" as="sourcePoint" />
+            <mxPoint x="290" y="570" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
