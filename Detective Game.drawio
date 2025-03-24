@@ -233,7 +233,7 @@
             <mxPoint x="290" y="570" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Wcfau3vfe7TbY7cXF94y-42" value="Try again" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="Wcfau3vfe7TbY7cXF94y-42" value="Map" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="117.5" y="620" width="70" height="20" as="geometry" />
         </mxCell>
         <mxCell id="w9KXQvv5ElY8Gr5ibtP6-44" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Wcfau3vfe7TbY7cXF94y-42" edge="1" target="w9KXQvv5ElY8Gr5ibtP6-2">
