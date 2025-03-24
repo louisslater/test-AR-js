@@ -259,10 +259,13 @@
         <mxCell id="Wcfau3vfe7TbY7cXF94y-46" value="Guess again" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="122.5" y="560" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="Wcfau3vfe7TbY7cXF94y-47" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.296;entryY=1.004;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="Wcfau3vfe7TbY7cXF94y-46" target="w9KXQvv5ElY8Gr5ibtP6-31">
+        <mxCell id="Wcfau3vfe7TbY7cXF94y-47" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="143" y="558" as="sourcePoint" />
-            <mxPoint x="213.75" y="510" as="targetPoint" />
+            <mxPoint x="182.5" y="569.5199999999999" as="sourcePoint" />
+            <mxPoint x="200" y="520" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="200" y="570" />
+            </Array>
           </mxGeometry>
         </mxCell>
       </root>
